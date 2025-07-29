@@ -1,0 +1,103 @@
+body{
+    padding: 0;
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    position: fixed;
+    min-width: 100% !important;
+    overflow-y: hidden;
+    background-color: white;
+}
+
+html{
+    position: fixed;
+    min-width: 100%;
+}
+
+.root{
+    background-color: white;
+}
+
+.App{
+    .headerfd{
+        background-color: #ffffff;
+        border-bottom: 0.5rem solid #B21D20;
+        font-size: 2rem;
+        color: white;
+        display: flex;
+        padding-right: 5rem;
+
+        .headertitle{
+            margin: 1.5rem 0rem;
+        }
+
+        .hamb{
+            margin: 1rem;
+        }
+
+        .systitle{
+            color: #B21D20;
+            padding-left: 2rem;
+            // padding-top: 0.5rem;
+        }
+
+        .logo-fd{
+            width: 12rem;
+            height: auto;
+        }
+
+        label{
+            font-size: 2rem;
+            color: white;
+            padding-top: 2.3rem;
+        }
+    }
+
+    .dashboard{
+        height: 100vh;
+    }
+}
+
+.pushable .sidebarx{
+    .last{
+        position: fixed !important;
+        bottom: 0 !important;
+        text-align: center !important;
+        width: 100% !important;
+    }
+
+    .headtext{
+        margin: 2rem!important;
+
+        .content{
+            color: white !important;
+        }
+    }
+}
+
+.bookings{
+    margin: 1rem;
+}
+
+.profile{
+    margin: 1rem 1.5rem;
+}
+
+.trip{
+    .button-selection-btm{
+        border-top: 0.5rem solid #B21D20;
+        background-color: #fd333324;
+        padding: 1rem;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+    }
+
+    .offline,
+    .available,
+    .intransit{
+        padding: 1rem 1.5rem;
+        height: 80vh;
+        overflow: auto;
+    }
+
+}
