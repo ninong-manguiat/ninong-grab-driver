@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { Grid, GridRow, Segment, GridColumn, Image, HeaderContent, HeaderSubheader, Header, Divider, Button, Feed, FeedEvent, FeedContent, Modal, ModalContent, Input, ModalActions, ModalHeader } from 'semantic-ui-react'
+import { Grid, GridRow, Segment, GridColumn, Image, HeaderContent, HeaderSubheader, Header, Divider, Button, Feed, FeedEvent, FeedContent, Modal, ModalContent, Input, ModalActions, ModalHeader, Icon } from 'semantic-ui-react'
 import { useDispatch, useSelector } from 'react-redux';
 import appSlice, { getApp } from '../store/slice/app.slice';
 import { DRIVER_STATUS, BOOKING_STATUS } from '../utils/constants';
 import firebase from '../firebase'
+import HeaderSubHeader from 'semantic-ui-react/dist/commonjs/elements/Header/HeaderSubheader';
 
 const Trip = () => {
   const { data } = useSelector(getApp)
@@ -15,6 +16,9 @@ const Trip = () => {
   const [ confirmLoad , setConfirmLoad ] = useState(false)
   const [ actualAmount , setActualAmount ] = useState('')
   const [ tripDetails , setTripDetails ] = useState()
+
+  const [ mainTripModal , setMainTripModal ] = useState(true)
+
   const dispatch = useDispatch();
 
   useEffect(()=>{
@@ -52,14 +56,19 @@ const Trip = () => {
   const renderOffline = () => {
     return (
       <div className="offline">
-        You are currently offline
+        <Header as='h2' icon>
+          <Icon name='close' color='red'></Icon>
+          <HeaderContent>
+          You are currently offline
+          <HeaderSubheader>You are in Walk-in Mode</HeaderSubheader>
+          </HeaderContent>
+        </Header>
       </div>
     )
   }
 
   const renderOfflineBtn = () => {
     return (
-        <div className="button-selection-btm">
         <Grid>
         <GridRow>
           <GridColumn width={16}>
@@ -67,7 +76,6 @@ const Trip = () => {
           </GridColumn>
         </GridRow>
         </Grid>
-        </div>
     )
   }
 
@@ -94,14 +102,19 @@ const Trip = () => {
   const renderAvailable = () => {
     return (
       <div className="available">
-        You are currently available
+        <Header as='h2' icon>
+          <Icon name='check' color='green'></Icon>
+          <HeaderContent>
+          You are currently available
+          <HeaderSubheader>Waiting for passenger...</HeaderSubheader>
+          </HeaderContent>
+        </Header>
       </div>
     )
   }
 
   const renderAvailableBtn = () => {
     return (
-        <div className="button-selection-btm">
         <Grid>
         <GridRow>
           <GridColumn width={16}>
@@ -109,7 +122,6 @@ const Trip = () => {
           </GridColumn>
         </GridRow>
         </Grid>
-        </div>
     )
   }
 
@@ -131,6 +143,20 @@ const Trip = () => {
       },1000)
   }
 
+  const handleCancelBooking = async() => {
+    if(TRIP && ACCOUNT_CODE){
+      const db = await firebase.firestore();
+      db.collection("bookings").doc(TRIP).update({
+          STATUS: BOOKING_STATUS.QUEUE
+      })
+  
+      db.collection("drivers").doc(ACCOUNT_CODE).update({
+        STATUS: DRIVER_STATUS.OFFLINE,
+        TRIP: ''
+      })
+    }
+  }
+
   // INTRANSIT
 
   const renderInTransit = () => {
@@ -140,20 +166,17 @@ const Trip = () => {
       const { d, t } = DATE
       const { ESTIMATE_AMOUNT } = ROUTE_COMPUTATION
       let url = "https://www.google.com/maps/embed/v1/directions?origin=" + ORIGIN.LAT + "," + ORIGIN.LNG + "&destination=" + DESTINATION.LAT + "," + DESTINATION.LNG + "&zoom=13&key=AIzaSyCLMHif6cuDU8xgbvBNpBHMC218KFdjueo"
-    
+      
       return (
         <div className="intransit">
-          {/* <Segment> */}
-            <Header as="h2">You got a TRIP!
-              <HeaderSubheader>{`#${TRIP}`}</HeaderSubheader>
-            </Header>
-            <iframe src={url} frameborder="0" style={{border:0}} width="100%" height="300"/>
-
             <Feed>
                 <FeedEvent>
                     <FeedContent date={'BOOKING DETAILS'} summary={() => {
                         return(<>{d}<br/>{t}</>)
                     }} />
+                </FeedEvent>
+                <br/>
+                <FeedEvent>
                     <FeedContent date={'BOOKING STATUS'} summary={() => {
                         return(<>{STATUS}</>)
                     }} />
@@ -178,7 +201,8 @@ const Trip = () => {
                 </FeedEvent>
                 <br/>
             </Feed>
-          {/* </Segment> */}
+            <iframe src={url} frameborder="0" style={{border:0}} width="100%" height="300"/>
+            <Button fluid onClick={() => handleCancelBooking()} color='red'>REASSIGN TRIP</Button>
         </div>
       )
     }else{
@@ -313,6 +337,7 @@ const Trip = () => {
         if(bookingStat === BOOKING_STATUS.DONE){
           // MODAL OPEN
           setModalConfirm(true)
+          setMainTripModal(false)
         }
 
         fetchTripDetails()
@@ -344,6 +369,7 @@ const Trip = () => {
 
         setConfirmLoad(false)
         setModalConfirm(false)
+        setMainTripModal(true)
       },[2000])
     }
   }
@@ -379,6 +405,7 @@ const Trip = () => {
       onClose={() => {}}
       open={modalConfirm}
       closeOnDimmerClick={false}
+      className='modal-confirmation'
     >
     <ModalHeader>
       Actual Amount of Trip
@@ -400,11 +427,39 @@ const Trip = () => {
     </Modal>
   }
 
+  const handleOncloseMainModal = () => {
+    setMainTripModal(false)
+  }
+
+  const renderMainTripModal = () => {
+    return <Modal
+      className='main-modal'
+      size='fullscreen'
+      onClose={handleOncloseMainModal}
+      open={mainTripModal}
+      closeOnDimmerClick={TRIP ? false : true}
+    >
+    {
+      TRIP && <ModalHeader>
+      <Header as="h2">
+        {STATUS}
+        <HeaderSubheader>Trip Code: {TRIP}</HeaderSubheader>
+      </Header>
+     </ModalHeader>
+    }
+    <ModalContent scrolling>
+    {renderContent()} 
+    </ModalContent>
+    <ModalActions>
+    {renderButtons()} 
+    </ModalActions>
+    </Modal>
+  }
+
   return (
     <div className="trip">
-      {renderContent()}
-      {renderButtons()}
       {renderModalConfirmation()}
+      {renderMainTripModal()}
     </div>
   )
 }

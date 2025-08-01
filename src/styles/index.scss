@@ -99,5 +99,17 @@ html{
         height: 80vh;
         overflow: auto;
     }
+}
 
+.offline,
+.available{
+    text-align: center !important;
+}
+
+.modal-confirmation{
+    z-index: 99;
+}
+
+.main-modal{
+    z-index: 100;
 }
