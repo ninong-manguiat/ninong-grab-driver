@@ -5,5 +5,6 @@ export const CODES = [
     'EEDWIN',
     'MRCELO',
     'VCTORR',
-    'EDDLCR'
+    'EDDLCR',
+    'AARIEL'
 ]
